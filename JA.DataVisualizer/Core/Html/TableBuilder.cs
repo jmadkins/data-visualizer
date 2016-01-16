@@ -8,7 +8,7 @@ namespace JA.DataVisualizer.Core.Html
 {
     public static class TableBuilder
     {
-        public static string Build<T>(IEnumerable<T> collection, string reportName, Func<T, object> propertySelector = null)
+        public static string Build<T>(IEnumerable<T> collection, string reportName)
         {
             var returnValue = new TagBuilder("table");
 
@@ -46,6 +46,48 @@ namespace JA.DataVisualizer.Core.Html
 
                 body.InnerHtml += string.Format("{0}\t{1}", Environment.NewLine, bodyRow);
             }
+
+            var footer = new TagBuilder("footer");
+
+            returnValue.InnerHtml += string.Format("{0}\t{1}", Environment.NewLine, body);
+
+            return returnValue.ToString();
+        }
+
+        public static string Build<T>(object data, string reportName)
+        {
+            var returnValue = new TagBuilder("table");
+
+            var properies = new List<PropertyInfo>();
+
+            var header = new TagBuilder("thead");
+            var headerRow = new TagBuilder("tr");
+
+            var properties = data.GetType().GetProperties();
+
+            headerRow.InnerHtml += $@"<tr><td class='typeheader' colspan='{properties.Length}'>{reportName}</td></tr>";
+
+            foreach (var property in properties)
+            {
+                var realProperty = properties.FirstOrDefault(m => m.Name == property.Name) ?? property;
+                properies.Add(realProperty); //to minimize the number of times we must use reflection, we 'cache' the PropertyInfo in the TableDefinition
+                headerRow.InnerHtml += CreateColumnHeaders<T>(realProperty);
+            }
+
+            header.InnerHtml += string.Format("{0}\t\t{1}", Environment.NewLine, headerRow);
+            returnValue.InnerHtml += string.Format("{0}\t{1}", Environment.NewLine, header);
+
+            var body = new TagBuilder("tbody");
+
+            var bodyRow = new TagBuilder("tr");
+
+            foreach (var property in properies)
+            {
+                var cell = GetCellValue<T>(property, data);
+                bodyRow.InnerHtml += string.Format("{0}\t\t{1}", Environment.NewLine, cell);
+            }
+
+            body.InnerHtml += string.Format("{0}\t{1}", Environment.NewLine, bodyRow);
 
             var footer = new TagBuilder("footer");
 
