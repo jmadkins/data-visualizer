@@ -16,14 +16,14 @@ namespace JA.DataVisualizer.Core
                 if (fieldInfo != null)
                 {
                     var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-                    returnValue = (attributes.Length > 0) ? attributes[0].Description : value.ToString();
+                    returnValue = attributes.Length > 0 ? attributes[0].Description : value.ToString();
                 }
                 else        //must be a flags enum with multiple values
                 {
                     var type = value.GetType();
                     foreach (Enum item in Enum.GetValues(type))
                     {
-                        if (((int)Enum.ToObject(type, item) != 0) && (value.HasFlag(item)))     //skip the None value
+                        if (((int)Enum.ToObject(type, item) != 0) && value.HasFlag(item))     //skip the None value
                         {
                             fieldInfo = type.GetField(item.ToString());
                             var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -31,7 +31,7 @@ namespace JA.DataVisualizer.Core
                             {
                                 returnValue += ", ";
                             }
-                            returnValue += (attributes.Length > 0) ? attributes[0].Description : item.ToString();
+                            returnValue += attributes.Length > 0 ? attributes[0].Description : item.ToString();
                         }
                     }
                 }
